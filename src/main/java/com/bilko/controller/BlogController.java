@@ -16,37 +16,28 @@
 
 package com.bilko.controller;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-
-import java.util.HashMap;
-
-import javax.servlet.http.Cookie;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-
-import org.bson.Document;
-
+import com.bilko.dao.SessionDao;
+import com.bilko.dao.UserDao;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
-
 import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.bson.Document;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-import com.bilko.dao.SessionDao;
-import com.bilko.dao.UserDao;
+import javax.servlet.http.Cookie;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.HashMap;
 
-import static spark.Spark.get;
-import static spark.Spark.port;
-import static spark.Spark.post;
+import static spark.Spark.*;
 
 /**
  * This class encapsulates the controllers for the blog web application. It delegates all interaction with MongoDB
@@ -297,7 +288,7 @@ public class BlogController {
 
     private Configuration createFreemarkerConfiguration() {
         final Configuration config = new Configuration(Configuration.getVersion());
-        config.setClassForTemplateLoading(BlogController.class, "/freemarker");
+        config.setClassForTemplateLoading(BlogController.class, "/");
         return config;
     }
 
