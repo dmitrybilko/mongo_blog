@@ -26,6 +26,8 @@ import java.util.Random;
 
 import sun.misc.BASE64Encoder;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.bson.Document;
 
 import com.mongodb.ErrorCategory;
@@ -48,7 +50,7 @@ public class UserDao {
                 .append("_id", username)
                 .append("password", makePasswordHash(password, Integer.toString(random.nextInt())));
 
-        if (email != null && !email.equals("")) {
+        if (StringUtils.isNotEmpty(email)) {
             user.append("email", email);
         }
 

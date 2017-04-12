@@ -37,15 +37,11 @@ public class SessionDao {
 
     public String findUserNameBySessionId(final String sessionId) {
         final Document session = getSession(sessionId);
-        if (session == null) {
-            return null;
-        } else {
-            return session.get("username").toString();
-        }
+        return session != null ? session.get("username").toString() : null;
     }
 
     public String startSession(final String username) {
-        final byte randomBytes[] = new byte[32];
+        final byte[] randomBytes = new byte[32];
         new SecureRandom().nextBytes(randomBytes);
         final Document session =
             new Document("username", username).append("_id", new BASE64Encoder().encode(randomBytes));
