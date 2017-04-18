@@ -35,6 +35,13 @@ public class BlogPostDao {
             .into(new ArrayList<>());
     }
 
+    public List<Document> findByTagDateDescending(final String tag) {
+        return posts
+            .find(eq("tags", tag))
+            .sort(descending("date"))
+            .limit(10)
+            .into(new ArrayList<>());
+    }
 
     public String addPost(final String title, final String body, final List tags, final String username) {
         System.out.println("INSERTING BLOG ENTRY WITH TITLE [" + title + "] AND BODY [" + body + "]");

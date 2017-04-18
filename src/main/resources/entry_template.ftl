@@ -21,11 +21,11 @@ Posted ${post["date"]?datetime}<i> By ${post["author"]}</i><br>
     <p>
         <em>Filed Under</em>:
         <#if post["tags"]??>
-        <#list post["tags"] as tag>
-        ${tag}
-    </#list>
-</#if>
-<p>
+            <#list post["tags"] as tag>
+                <a href="/tag/${tag}">${tag}</a>
+            </#list>
+        </#if>
+    <p>
 Comments:
 <ul>
     <#if post["comments"]??>

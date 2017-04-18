@@ -26,9 +26,6 @@ import java.util.List;
 
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
@@ -48,6 +45,10 @@ import freemarker.template.TemplateException;
 import com.bilko.dao.BlogPostDao;
 import com.bilko.dao.SessionDao;
 import com.bilko.dao.UserDao;
+
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import static spark.Spark.get;
 import static spark.Spark.port;
@@ -95,7 +96,7 @@ public class BlogController {
                 final String username = sessionDao.findUserNameBySessionId(getSessionCookie(request));
                 final List<Document> posts = blogPostDao.findByDateDescending(10);
                 final SimpleHash root = new SimpleHash(new DefaultObjectWrapper(Configuration.getVersion()));
-                if (StringUtils.isBlank(username)) {
+                if (isNotBlank(username)) {
                     root.put("username", username);
                 }
                 root.put("myposts", posts);
@@ -111,7 +112,7 @@ public class BlogController {
                 throws IOException, TemplateException {
 
                 final String username = sessionDao.findUserNameBySessionId(getSessionCookie(request));
-                if (StringUtils.isBlank(username)) {
+                if (isBlank(username)) {
                     System.out.println("welcome() CAN'T IDENTIFY THE USER, REDIRECTING TO signup");
                     response.redirect("/signup");
                 } else {
@@ -153,8 +154,8 @@ public class BlogController {
                 final String verify = request.queryParams("verify");
                 final HashMap<String, String> root = new HashMap<String, String>() {
                     {
-                        put("username", StringEscapeUtils.escapeHtml4(username));
-                        put("email", StringEscapeUtils.escapeHtml4(email));
+                        put("username", escapeHtml4(username));
+                        put("email", escapeHtml4(email));
                     }
                 };
 
@@ -210,7 +211,7 @@ public class BlogController {
                     }
                 } else {
                     final SimpleHash root = new SimpleHash(new DefaultObjectWrapper(Configuration.getVersion()));
-                    root.put("username", StringEscapeUtils.escapeHtml4(username));
+                    root.put("username", escapeHtml4(username));
                     root.put("password", "");
                     root.put("login_error", "Invalid Login");
                     template.process(root, writer);
@@ -225,7 +226,7 @@ public class BlogController {
                 throws IOException, TemplateException {
 
                 final String username = sessionDao.findUserNameBySessionId(getSessionCookie(request));
-                if (StringUtils.isBlank(username)) {
+                if (isBlank(username)) {
                     response.redirect("/login");
                 } else {
                     SimpleHash root = new SimpleHash(new DefaultObjectWrapper(Configuration.getVersion()));
@@ -241,13 +242,13 @@ public class BlogController {
             protected void doHandle(final Request request, final Response response, final Writer writer)
                 throws IOException, TemplateException {
 
-                final String title = StringEscapeUtils.escapeHtml4(request.queryParams("subject"));
-                final String post = StringEscapeUtils.escapeHtml4(request.queryParams("body"));
-                final String tags = StringEscapeUtils.escapeHtml4(request.queryParams("tags"));
+                final String title = escapeHtml4(request.queryParams("subject"));
+                final String post = escapeHtml4(request.queryParams("body"));
+                final String tags = escapeHtml4(request.queryParams("tags"));
                 final String username = sessionDao.findUserNameBySessionId(getSessionCookie(request));
-                if (StringUtils.isBlank(username)) {
+                if (isBlank(username)) {
                     response.redirect("/login");
-                } else if (StringUtils.isBlank(title) || StringUtils.isBlank(post)) {
+                } else if (isBlank(title) || isBlank(post)) {
                     HashMap<String, String> root = new HashMap<String, String>() {
                         {
                             put("errors", "post must contain a title and blog entry.");
@@ -299,14 +300,14 @@ public class BlogController {
             protected void doHandle(final Request request, final Response response, final Writer writer)
                 throws IOException, TemplateException {
 
-                final String name = StringEscapeUtils.escapeHtml4(request.queryParams("commentName"));
-                final String email = StringEscapeUtils.escapeHtml4(request.queryParams("commentEmail"));
-                final String body = StringEscapeUtils.escapeHtml4(request.queryParams("commentBody"));
+                final String name = escapeHtml4(request.queryParams("commentName"));
+                final String email = escapeHtml4(request.queryParams("commentEmail"));
+                final String body = escapeHtml4(request.queryParams("commentBody"));
                 final String permalink = request.queryParams("permalink");
                 final Document post = blogPostDao.findByPermalink(permalink);
                 if (post == null) {
                     response.redirect("/post_not_found");
-                } else if (StringUtils.isBlank(name) || StringUtils.isBlank(body)) {
+                } else if (isBlank(name) || isBlank(body)) {
                     final SimpleHash comment = new SimpleHash(new DefaultObjectWrapper(Configuration.getVersion()));
                     comment.put("name", name);
                     comment.put("email", email);
@@ -322,6 +323,25 @@ public class BlogController {
                     blogPostDao.addPostComment(name, email, body, permalink);
                     response.redirect("/post/" + permalink);
                 }
+            }
+        });
+
+        get("/tag/:thetag", new FreemarkerBasedRoute("blog_template.ftl") {
+            @Override
+            protected void doHandle(final Request request, final Response response, final Writer writer)
+                throws IOException, TemplateException {
+
+                final String username = sessionDao.findUserNameBySessionId(getSessionCookie(request));
+                final SimpleHash root = new SimpleHash(new DefaultObjectWrapper(Configuration.getVersion()));
+                final String tag = escapeHtml4(request.params(":thetag"));
+                final List<Document> posts = blogPostDao.findByTagDateDescending(tag);
+
+                if (isNotBlank(username)) {
+                    root.put("username", username);
+                }
+                root.put("myposts", posts);
+
+                template.process(root, writer);
             }
         });
 
@@ -441,7 +461,7 @@ public class BlogController {
 
         final ArrayList<String> cleaned = new ArrayList<>();
         for (final String tag : tagArray) {
-            if (StringUtils.isNotBlank(tag) && !cleaned.contains(tag)) {
+            if (isNotBlank(tag) && !cleaned.contains(tag)) {
                 cleaned.add(tag);
             }
         }

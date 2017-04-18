@@ -26,15 +26,12 @@
         <hr>
         ${post["body"]!""}
         <p>
-
-            <p>
-                <em>Filed Under</em>:
-                <#if post["tags"]??>
+            <em>Filed Under</em>:
+            <#if post["tags"]??>
                 <#list post["tags"] as tag>
-                ${tag}
-            </#list>
-        </#if>
-
+                    <a href="/tag/${tag}">${tag}</a>
+                </#list>
+            </#if>
         <p>
         </#list>
     </body>
